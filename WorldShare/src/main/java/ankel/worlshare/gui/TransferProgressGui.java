@@ -19,7 +19,6 @@ import net.minecraft.resources.ResourcePackType;
 import net.minecraft.resources.VanillaPack;
 import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;

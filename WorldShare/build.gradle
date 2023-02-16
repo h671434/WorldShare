@@ -86,7 +86,6 @@ dependencies {
 	implementation 'com.dropbox.core:dropbox-core-sdk:5.4.4'
 	implementation 'com.fasterxml.jackson.core:jackson-core:2.7.9'
 }
- 
 
 shadowJar {
     dependencies {
@@ -98,7 +97,7 @@ shadowJar {
     relocate 'com.dropbox.core', "ankel.worldshare.repack.com.dropbox.core"
     relocate 'com.fasterxml.jackson.core', "ankel.worldshare.repack.com.fasterxml.jackson.core"
     
-    classifier = ''
+    classifier = 'shaded'
     
     manifest {
         attributes([
@@ -116,3 +115,4 @@ shadowJar {
 reobf {
     shadowJar {}
 }
+

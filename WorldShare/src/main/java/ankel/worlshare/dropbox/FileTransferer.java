@@ -6,8 +6,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.dropbox.core.v2.files.FileMetadata;
-import net.minecraft.resources.IAsyncReloader;
 
+import net.minecraft.resources.IAsyncReloader;
 import net.minecraft.util.Unit;
 
 public interface FileTransferer extends Runnable {

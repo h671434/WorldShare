@@ -1,18 +1,13 @@
 package ankel.worlshare.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 
-import ankel.worlshare.gui.WorldList.Entry;
 import ankel.worlshare.world.DbxWorld;
 import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.WorldSelectionList;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.text.ITextComponent;

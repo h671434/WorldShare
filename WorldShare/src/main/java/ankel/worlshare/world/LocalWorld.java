@@ -4,10 +4,6 @@ import java.io.File;
 import java.util.Date;
 import java.util.Objects;
 
-import com.google.common.hash.Hashing;
-
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
 import net.minecraft.world.storage.WorldSummary;
 
 public class LocalWorld implements World {

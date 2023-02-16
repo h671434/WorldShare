@@ -1,29 +1,16 @@
 package ankel.worlshare.world;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Objects;
 
-import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.FolderMetadata;
-import com.dropbox.core.v2.files.GetMetadataErrorException;
-import com.dropbox.core.v2.files.ListFolderErrorException;
-import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
-import com.dropbox.core.v2.files.SearchErrorException;
-import com.dropbox.core.v2.files.SearchMatchV2;
-import com.dropbox.core.v2.files.SearchV2Result;
-import com.dropbox.core.v2.files.ThumbnailErrorException;
 
 public class DbxWorld implements World {
 	private static final String ROOT_FOLDER = "/WorldShare/";

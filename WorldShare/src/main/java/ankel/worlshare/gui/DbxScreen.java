@@ -2,20 +2,18 @@ package ankel.worlshare.gui;
 
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.dropbox.core.v2.DbxClientV2;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import ankel.worlshare.gui.WorldList.Entry;
 import ankel.worlshare.world.DbxWorld;
-import ankel.worlshare.world.LocalWorld;
 import ankel.worlshare.world.World;
 import net.minecraft.client.gui.DialogTexts;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.WorldSelectionScreen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.text.ITextComponent;
@@ -24,102 +22,103 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.client.gui.screen.ModListScreen;
 
 @OnlyIn(Dist.CLIENT)
 public class DbxScreen extends Screen {
-	private static final ITextComponent DRAG_AND_DROP = (new TranslationTextComponent("Drag and drop worlds to upload or download from DropBox")).withStyle(TextFormatting.GRAY);
-	private final DbxController dbxController;
-	private WorldList dbxlist;
-	private WorldList locallist;
-	private Button shareButton;
-	private Button deleteButton;
+	private static final int PADDING = 6;
+	private static final int LIST_WIDTH = 130;
+	
+	private final DbxController controller;
+	private WorldList worldList;
+	private WorldList.Entry selected;
+	private TextFieldWidget search;
 	private List<IReorderingProcessor> toolTip;
 	
 	public DbxScreen(WorldSelectionScreen lastScreen, DbxClientV2 dbxclient) {
 		super(new TranslationTextComponent("DropBox"));
-		this.dbxController = new DbxController(lastScreen.getMinecraft(), dbxclient, () -> reload());
+		this.controller = new DbxController(lastScreen.getMinecraft(),
+				dbxclient, () -> reload());
 	}
 	
+	@Override
 	protected void init() {
-	    this.locallist = new WorldList(this, dbxController, this.minecraft,
-	    		200, this.height, new TranslationTextComponent("Local"), this.locallist);
-	    this.locallist.setLeftPos(this.width / 2 - 4 - 200);
-	    this.dbxlist = new WorldList(this, dbxController, this.minecraft, 200, 
-	    		this.height, new TranslationTextComponent("DropBox"), this.dbxlist);
-	    this.dbxlist.setLeftPos(this.width / 2 + 4);
-	    this.children.add(this.locallist);
-	    this.children.add(this.dbxlist);
+		int y = this.height - PADDING - 20;
+		this.addButton(new Button(((
+				LIST_WIDTH + PADDING + this.width - 200) / 2), 
+				y, 200, 20, 
+				new TranslationTextComponent("gui.done"), 
+				b -> onClose()));
 		
-		this.shareButton = this.addButton(new Button(
-				this.width / 2 - 154, this.height - 44, 150, 20, 
-				new TranslationTextComponent("Share"),
-				e -> {this.minecraft.setScreen(new ShareScreen(this, dbxController, 
-							(DbxWorld) dbxlist.getSelected().getWorld()));
-		}));
-		this.addButton(new Button(this.width / 2 + 4, this.height - 44, 150, 20, 
-				DialogTexts.GUI_DONE, (p_214327_1_) -> {
-					this.onClose();
-		}));
+		this.addButton(new Button(PADDING, y, LIST_WIDTH, 20,
+				new StringTextComponent("Refresh"),
+				b -> reload())); 
+		
+		y -= PADDING + 20;
+		this.addButton(new Button(PADDING, y, LIST_WIDTH, 20,
+				new StringTextComponent("Add world"),
+				b -> System.out.println("TODO"))); 
+		
+		y -= PADDING;
+	    this.worldList = new WorldList(this, minecraft, LIST_WIDTH, 
+	    		PADDING + getFontRenderer().lineHeight + 20 + PADDING, y, worldList);
+	    this.worldList.setLeftPos(PADDING);
+	    this.children.add(worldList);
 
+		this.search =  new TextFieldWidget(getFontRenderer(), 
+				PADDING + 1, PADDING + 14 + 1,  LIST_WIDTH - 2, 14, 
+				new TranslationTextComponent("fml.menu.mods.search"));
+		
 		this.reload();
 	}
 	
-	public void render(MatrixStack p_230430_1_, int p_230430_2_, int p_230430_3_, float p_230430_4_) {
-		this.renderDirtBackground(0);
-		this.toolTip = null;
-		this.locallist.render(p_230430_1_, p_230430_2_, p_230430_3_, p_230430_4_);
-		this.dbxlist.render(p_230430_1_, p_230430_2_, p_230430_3_, p_230430_4_);
-		drawCenteredString(p_230430_1_, this.font, this.title, this.width / 2, 8, 16777215);
-		drawCenteredString(p_230430_1_, this.font, DRAG_AND_DROP, this.width / 2, 20, 16777215);
-		super.render(p_230430_1_, p_230430_2_, p_230430_3_, p_230430_4_);
-		if (this.toolTip != null) {
-			this.renderTooltip(p_230430_1_, this.toolTip, p_230430_2_, p_230430_3_);
-		}
-	}	
+	@Override
+	public void tick() {
+		search.tick();
+		worldList.setSelected(selected);
+		
+		updateWorldInfo();
+	}
 	
 	private void reload() {
-		this.populateLists();
-	    this.updateButtonStatus();   
-	}
-	
-	private void populateLists() {
-		this.updateList(this.dbxlist, this.dbxController.getDbxWorlds());
-		this.updateList(this.locallist, this.dbxController.getLocalWorlds());
-	}
-	
-	private void updateList(WorldList list, List<World> worlds) {
-		list.children().clear();
-		worlds.forEach(world -> {
-			list.children().add(new WorldList.Entry(list, world));
+		worldList.children().clear();
+		controller.getDbxWorlds().forEach(world -> {
+			worldList.children().add(new WorldList.Entry(worldList, world));
 		});
+		setSelected(null); 
 	}
 	
-	public void updateButtonStatus() {
-		this.shareButton.active = dbxlist.getSelected() != null;
+	public void updateWorldInfo() {
+		
 	}
+	
+	@Override
+	public void render(MatrixStack mStack, int mouseX, int mouseY, float partialTicks) {
+		this.renderDirtBackground(0);
+		this.toolTip = null;
+		this.worldList.render(mStack, mouseX, mouseY, partialTicks);
+		drawCenteredString(mStack, this.font, this.title, this.width / 2, 8, 16777215);
+		super.render(mStack, mouseX, mouseY, partialTicks);
+		if (this.toolTip != null) {
+			this.renderTooltip(mStack, this.toolTip, mouseX, mouseY);
+		}
+	}	
 	
 	public void onClose() {
 		this.minecraft.setScreen(new WorldSelectionScreen(new MainMenuScreen()));
 	}
 	
-	public void setSelected(World world) {
-		dbxlist.setSelected(null);
-		locallist.setSelected(null);
-		for(Entry entry : dbxlist.children()) {
-			if (entry.getWorld().equals(world)) {
-				dbxlist.setSelected(entry);
-			}
-		}
-		for(Entry entry : locallist.children()) {
-			if (entry.getWorld().equals(world)) {
-				locallist.setSelected(entry);
-			}
-		}
-		updateButtonStatus();
-	}
-	
 	public void setToolTip(List<IReorderingProcessor> p_239026_1_) {
 		this.toolTip = p_239026_1_;
+	}
+	
+	public FontRenderer getFontRenderer() {
+		return font;
+	}
+	
+	public void setSelected(WorldList.Entry entry) {
+		this.selected = entry == this.selected ? null : entry;
+		updateWorldInfo();
 	}
 	
 }

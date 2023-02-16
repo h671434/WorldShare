@@ -2,34 +2,22 @@ package ankel.worlshare.dropbox;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.dropbox.core.DbxApiException;
 import com.dropbox.core.DbxException;
-import com.dropbox.core.util.IOUtil.ProgressListener;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.async.PollErrorException;
 import com.dropbox.core.v2.files.CreateFolderBatchBuilder;
 import com.dropbox.core.v2.files.CreateFolderBatchJobStatus;
 import com.dropbox.core.v2.files.CreateFolderBatchLaunch;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.UploadErrorException;
-import com.dropbox.core.v2.files.UploadSessionStartBuilder;
-import com.dropbox.core.v2.files.UploadSessionStartUploader;
 import com.dropbox.core.v2.files.WriteMode;
 
 public class WorldUploader implements FileTransferer {

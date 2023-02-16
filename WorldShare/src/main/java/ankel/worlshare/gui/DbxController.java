@@ -10,11 +10,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.FolderMetadata;
-import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.Metadata;
-import com.dropbox.core.v2.files.RelocationResult;
-import com.dropbox.core.v2.sharing.FolderAction;
 import com.dropbox.core.v2.sharing.SharedFolderMetadata;
 
 import ankel.worlshare.dropbox.WorldDownloader;
