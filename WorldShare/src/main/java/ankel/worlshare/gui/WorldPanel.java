@@ -31,11 +31,6 @@ public class WorldPanel extends ScrollPanel {
 				+ (members.size() * (screen.getFontRenderer().lineHeight + PADDING));
 		return worldsHeight + membersHeight;
 	}
-	
-	@Override
-	protected int getScrollAmount() {
-		return screen.getFontRenderer().lineHeight * 3;
-	}
 
 	@Override
 	protected void drawPanel(MatrixStack mStack, int entryRight, int relativeY, 

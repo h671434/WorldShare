@@ -1,4 +1,4 @@
-package ankel.worlshare.gui;
+package ankel.worlshare.world;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -16,15 +16,13 @@ import com.dropbox.core.v2.sharing.SharedFolderMetadata;
 import ankel.worlshare.dropbox.WorldDownloader;
 import ankel.worlshare.dropbox.WorldSharing;
 import ankel.worlshare.dropbox.WorldUploader;
-import ankel.worlshare.world.DbxWorld;
-import ankel.worlshare.world.LocalWorld;
-import ankel.worlshare.world.World;
+import ankel.worlshare.gui.TransferProgressGui;
 import net.minecraft.client.AnvilConverterException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IAsyncReloader;
 import net.minecraft.world.storage.WorldSummary;
 
-public class DbxController {
+public class WorldController {
 	private final static Logger LOGGER = LogManager.getLogger();
 	private final static String DBX_FOLDER = "/WorldShare";
 	private final Minecraft minecraft;
@@ -33,7 +31,7 @@ public class DbxController {
 	private final List<World> dbxworlds;
 	private final Runnable onListChange;
 	
-	public DbxController(Minecraft minecraft, DbxClientV2 client, Runnable onListChange) {
+	public WorldController(Minecraft minecraft, DbxClientV2 client, Runnable onListChange) {
 		this.minecraft = minecraft;
 		this.client = client;
 		this.dbxworlds = new ArrayList<>();
