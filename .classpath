@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="WorldShare/src/main/java"/>
+	<classpathentry kind="lib" path="WorldShare/gradle/wrapper/gradle-wrapper.jar"/>
+	<classpathentry kind="lib" path="WorldShare/libs/dropbox-core-sdk-5.4.4.jar"/>
+	<classpathentry kind="lib" path="WorldShare/libs/jackson-core-2.7.9.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

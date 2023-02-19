@@ -32,6 +32,7 @@ public class DbxScreen extends Screen {
 	private final DbxController controller;
 	private WorldList worldList;
 	private WorldList.Entry selected;
+	private WorldPanel worldPanel;
 	private TextFieldWidget search;
 	private List<IReorderingProcessor> toolTip;
 	
@@ -61,15 +62,25 @@ public class DbxScreen extends Screen {
 		
 		y -= PADDING;
 	    this.worldList = new WorldList(this, minecraft, LIST_WIDTH, 
-	    		PADDING + getFontRenderer().lineHeight + 20 + PADDING, y, worldList);
+	    		30 + (PADDING * 2), y, worldList);
 	    this.worldList.setLeftPos(PADDING);
 	    this.children.add(worldList);
 
 		this.search =  new TextFieldWidget(getFontRenderer(), 
-				PADDING + 1, PADDING + 14 + 1,  LIST_WIDTH - 2, 14, 
-				new TranslationTextComponent("fml.menu.mods.search"));
+				PADDING + 1, PADDING + 10,  LIST_WIDTH - 2, 14, 
+				new StringTextComponent("Search"));
+		children.add(search);
+		search.setFocus(false);
+        search.setCanLoseFocus(true);
 		
-		this.reload();
+        this.worldPanel = new WorldPanel(this,
+        		this.width - LIST_WIDTH - (PADDING * 3),
+        		this.height - 20 - 10 - (PADDING * 2),
+        		20 + PADDING,
+        		worldList.getRight() + PADDING);
+        children.add(worldPanel);
+		
+        reload();
 	}
 	
 	@Override
@@ -97,6 +108,8 @@ public class DbxScreen extends Screen {
 		this.renderDirtBackground(0);
 		this.toolTip = null;
 		this.worldList.render(mStack, mouseX, mouseY, partialTicks);
+		this.worldPanel.render(mStack, mouseX, mouseY, partialTicks);
+		this.search.render(mStack, mouseX, mouseY, partialTicks);
 		drawCenteredString(mStack, this.font, this.title, this.width / 2, 8, 16777215);
 		super.render(mStack, mouseX, mouseY, partialTicks);
 		if (this.toolTip != null) {
