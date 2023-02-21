@@ -4,13 +4,18 @@ import java.io.File;
 import java.util.Date;
 import java.util.Objects;
 
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.WorldSummary;
 
 public class LocalWorld implements World {
 	private final WorldSummary summary;
+	private ResourceLocation icon;
+	private Status status;
 	
 	public LocalWorld(WorldSummary summary) {
 		this.summary = summary;
+		icon = null;
+		status = Status.UP_TO_DATE;
 	}
 
 	@Override
@@ -19,13 +24,25 @@ public class LocalWorld implements World {
 	}
 
 	@Override
-	public File getWorldIcon() {
-		return summary.getIcon();
+	public ResourceLocation getServerIcon() {
+		if(icon == null) {
+			icon = loadServerIcon(summary.getIcon());
+		}
+		return icon;
 	}
 
 	@Override
 	public Date getLastModified() {
 		return new Date(summary.getLastPlayed());
+	}
+	
+	@Override
+	public String getLastPerson() {
+		return "";
+	}
+
+	public String getStatus() {
+		return status.getValue();
 	}
 
 	@Override

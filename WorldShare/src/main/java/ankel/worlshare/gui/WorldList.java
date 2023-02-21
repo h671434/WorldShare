@@ -41,8 +41,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class WorldList extends ExtendedList<WorldList.Entry> {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final ResourceLocation ICON_MISSING = 
-			new ResourceLocation("textures/misc/unknown_server.png");
 	
 	public List<World> list;
 	private final DbxScreen screen;
@@ -85,8 +83,7 @@ public class WorldList extends ExtendedList<WorldList.Entry> {
 			this.nameDisplayCache = cacheName(minecraft, 
 					new StringTextComponent(world.getWorldName()));
 			this.ownerDisplayCache = cacheDescription(minecraft, 
-					new StringTextComponent(new SimpleDateFormat()
-							.format(world.getLastModified())));
+					new StringTextComponent(world.getStatus()));
 		}
 		
 		private static IReorderingProcessor cacheName(Minecraft minecraft, 
@@ -106,41 +103,13 @@ public class WorldList extends ExtendedList<WorldList.Entry> {
 	    	return IBidiRenderer.create(minecraft.font, textcomponent, 130, 2);
 	    }
 	    
-	    @Nullable
-	    private ResourceLocation loadServerIcon(World world) {
-			String s = world.getWorldName();
-			File iconFile = world.getWorldIcon();
-			ResourceLocation iconLocation = new ResourceLocation("minecraft", "worlds/" 
-					+ Util.sanitizeName(s, ResourceLocation::validPathChar) 
-					+ "/" + Hashing.sha1().hashUnencodedChars(s) 
-					+ "/icon");
-	        boolean flag = iconFile != null && iconFile.isFile();
-	        if (flag) {
-	        	try (InputStream inputstream = new FileInputStream(iconFile)) {
-	        		NativeImage nativeimage = NativeImage.read(inputstream);
-	        		Validate.validState(nativeimage.getWidth() == 64, "Must be 64 pixels wide");
-	        		Validate.validState(nativeimage.getHeight() == 64, "Must be 64 pixels high");
-	        		DynamicTexture dynamictexture = new DynamicTexture(nativeimage);
-	        		minecraft.getTextureManager().register(iconLocation, dynamictexture);
-	        		return iconLocation;
-	        	} catch (FileNotFoundException filenotfoundexception) {
-	        	} catch (Exception e) {
-	        		LOGGER.warn("Failed to load icon from pack {}", s, e);
-	            }
-	         } else {
-	            minecraft.getTextureManager().release(iconLocation);
-	         }
-	        
-	        return ICON_MISSING;
-	     }
-	    
 	    @SuppressWarnings("deprecation")
 		public void render(MatrixStack mStack, int p_230432_2_, 
 	    		int y0, int x0, int p_230432_5_, 
 	    		int p_230432_6_, int p_230432_7_, int p_230432_8_, 
 	    		boolean p_230432_9_, float p_230432_10_) {	        
 	    	
-	        this.minecraft.getTextureManager().bind(loadServerIcon(world));
+	        this.minecraft.getTextureManager().bind(world.getServerIcon());
 	        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 	        AbstractGui.blit(mStack, x0, y0, 0.0F, 0.0F, 32, 32, 32, 32);
 	        

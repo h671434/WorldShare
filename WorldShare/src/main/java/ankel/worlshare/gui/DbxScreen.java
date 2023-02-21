@@ -5,6 +5,8 @@ import java.util.List;
 import com.dropbox.core.v2.DbxClientV2;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import ankel.worlshare.world.DbxWorld;
+import ankel.worlshare.world.World;
 import ankel.worlshare.world.WorldController;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.MainMenuScreen;
@@ -51,11 +53,9 @@ public class DbxScreen extends Screen {
 				y, 200, 20, 
 				new TranslationTextComponent("gui.done"), 
 				b -> onClose()));
-		
 		this.addButton(new Button(PADDING, y, LIST_WIDTH, 20,
 				new StringTextComponent("Refresh"),
 				b -> reload())); 
-		
 		y -= PADDING + 20;
 		this.addButton(new Button(PADDING, y, LIST_WIDTH, 20,
 				new StringTextComponent("Add world"),
@@ -65,36 +65,33 @@ public class DbxScreen extends Screen {
 	    this.worldList = new WorldList(this, minecraft, LIST_WIDTH, 
 	    		30 + (PADDING * 2), y, worldList);
 	    this.worldList.setLeftPos(PADDING);
-
+	    children.add(worldList);
+	    
 		this.search =  new TextFieldWidget(getFontRenderer(), 
 				PADDING + 1, PADDING + 16,  LIST_WIDTH - 2, 14, 
 				new StringTextComponent("DropBox"));
 		search.setFocus(false);
         search.setCanLoseFocus(true);
-        
+		children.add(search);
+
         this.worldPanel = new WorldPanel(this,
         		this.width - LIST_WIDTH - (PADDING * 3),
         		this.height - (PADDING * 4) - 50,
         		26 + (PADDING * 2),
         		worldList.getRight() + PADDING);
-        
         children.add(worldPanel);
-	    children.add(worldList);
-		children.add(search);
-		
+        
 		y = 12;
 		int x = (LIST_WIDTH + PADDING + this.width - 200) / 2;
-		this.downloadButton = this.addButton(new Button( x, y, 62, 20,
+		this.downloadButton = this.addButton(new Button(x, y, 62, 20,
 				new StringTextComponent("Download"),
 				b -> System.out.println("TODO")));
 		downloadButton.active = false;
-		
 		x += 62 + PADDING + 1;
-		this.uploadButton = this.addButton(new Button( x, y, 62, 20,
+		this.uploadButton = this.addButton(new Button(x, y, 62, 20,
 				new StringTextComponent("Upload"),
 				b -> System.out.println("TODO")));
 		uploadButton.active = false;
-		
 		x += 62 + PADDING + 1;
 		this.addMemberButton = this.addButton(new Button(x, y, 62, 20,
 				new StringTextComponent("Add member"),
@@ -102,24 +99,6 @@ public class DbxScreen extends Screen {
 		addMemberButton.active = false;
 		
 		reload();
-	}
-	
-	@Override
-	public void tick() {
-		search.tick();
-		worldList.setSelected(selected);
-	}
-	
-	private void reload() {
-		worldList.children().clear();
-		controller.getDbxWorlds().forEach(world -> {
-			worldList.children().add(new WorldList.Entry(worldList, world));
-		});
-		setSelected(null); 
-	}
-	
-	public void updateWorldInfo() {
-		//TODO
 	}
 	
 	@Override
@@ -139,6 +118,33 @@ public class DbxScreen extends Screen {
 		}
 	}	
 	
+	@Override
+	public void tick() {
+		search.tick();
+		worldList.setSelected(selected);
+	}
+	
+	private void reload() {
+		worldList.children().clear();
+		controller.getDbxWorlds().forEach(world -> {
+			worldList.children().add(new WorldList.Entry(worldList, world));
+		});
+		setSelected(null); 
+	}
+	
+	public void updateWorldInfo() {
+		boolean active = selected != null;
+		this.downloadButton.active = active;
+		this.uploadButton.active = active;
+		this.addMemberButton.active = active;
+				
+		if(active) {
+			this.worldPanel.setWorldInfo((DbxWorld) selected.getWorld());
+		} else {
+			this.worldPanel.clearInfo();
+		}
+	}
+	
 	public void onClose() {
 		this.minecraft.setScreen(new WorldSelectionScreen(new MainMenuScreen()));
 	}
@@ -153,6 +159,7 @@ public class DbxScreen extends Screen {
 	
 	public void setSelected(WorldList.Entry entry) {
 		this.selected = entry == this.selected ? null : entry;
+		System.out.println("updated");
 		updateWorldInfo();
 	}
 	
