@@ -26,9 +26,10 @@ public interface World extends Comparable<World> {
 	
 	public enum Status {
 		UP_TO_DATE("Up to date"), 
-		NEEDS_DOWNLOAD("Local version is old"),
-		NEEDS_UPLOAD("DropBox version is old"),
-		DISCONNECTED("Unable to reach DropBox");
+		NEEDS_DOWNLOAD("Old local version"),
+		NEEDS_UPLOAD("Old DropBox version"),
+		DISCONNECTED("Unable to connect"),
+		NOT_DOWNLOADED("No local version");
 		private String value;
 		private Status(String value) {
 			this.value = value;
@@ -56,6 +57,7 @@ public interface World extends Comparable<World> {
 				Minecraft.getInstance().getTextureManager().register(iconLocation, dynamictexture);
 				return iconLocation;
 			} catch (FileNotFoundException filenotfoundexception) {
+				LogManager.getLogger().warn(filenotfoundexception.getMessage());
 			} catch (Exception e) {
 				LogManager.getLogger().warn("Failed to load icon from pack {}", s, e);
 			}
@@ -75,5 +77,7 @@ public interface World extends Comparable<World> {
 	ResourceLocation getServerIcon();
 	
 	String getStatus();
+	
+	void setStatus(Status status);
 	
 }

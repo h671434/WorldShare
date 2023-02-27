@@ -29,10 +29,10 @@ public class DbxScreen extends Screen {
 	
 	private final WorldController controller;
 	
-	private WorldList worldList;
-	private WorldList.Entry selected;
+	private DbxWorldList worldList;
+	private DbxWorldList.Entry selected;
 	private TextFieldWidget search;
-	private WorldPanel worldPanel;
+	private DbxWorldPanel worldPanel;
 	private Widget downloadButton;
 	private Widget uploadButton;
 	private Widget addMemberButton;
@@ -62,7 +62,7 @@ public class DbxScreen extends Screen {
 				b -> System.out.println("TODO"))); 
 		
 		y -= PADDING;
-	    this.worldList = new WorldList(this, minecraft, LIST_WIDTH, 
+	    this.worldList = new DbxWorldList(this, minecraft, LIST_WIDTH, 
 	    		30 + (PADDING * 2), y, worldList);
 	    this.worldList.setLeftPos(PADDING);
 	    children.add(worldList);
@@ -74,7 +74,7 @@ public class DbxScreen extends Screen {
         search.setCanLoseFocus(true);
 		children.add(search);
 
-        this.worldPanel = new WorldPanel(this,
+        this.worldPanel = new DbxWorldPanel(this,
         		this.width - LIST_WIDTH - (PADDING * 3),
         		this.height - (PADDING * 4) - 50,
         		26 + (PADDING * 2),
@@ -85,17 +85,18 @@ public class DbxScreen extends Screen {
 		int x = (LIST_WIDTH + PADDING + this.width - 200) / 2;
 		this.downloadButton = this.addButton(new Button(x, y, 62, 20,
 				new StringTextComponent("Download"),
-				b -> System.out.println("TODO")));
+				b -> controller.downloadWorld(selected.getWorld())));
 		downloadButton.active = false;
 		x += 62 + PADDING + 1;
 		this.uploadButton = this.addButton(new Button(x, y, 62, 20,
 				new StringTextComponent("Upload"),
-				b -> System.out.println("TODO")));
+				b -> controller.uploadWorld(selected.getWorld().getLocalWorld())));
 		uploadButton.active = false;
 		x += 62 + PADDING + 1;
 		this.addMemberButton = this.addButton(new Button(x, y, 62, 20,
 				new StringTextComponent("Add member"),
-				b -> System.out.println("TODO")));
+				b -> this.minecraft.setScreen(new AddMemberScreen(
+						this, controller, selected.getWorld()))));
 		addMemberButton.active = false;
 		
 		reload();
@@ -127,7 +128,7 @@ public class DbxScreen extends Screen {
 	private void reload() {
 		worldList.children().clear();
 		controller.getDbxWorlds().forEach(world -> {
-			worldList.children().add(new WorldList.Entry(worldList, world));
+			worldList.children().add(new DbxWorldList.Entry(worldList, world));
 		});
 		setSelected(null); 
 	}
@@ -157,7 +158,7 @@ public class DbxScreen extends Screen {
 		return font;
 	}
 	
-	public void setSelected(WorldList.Entry entry) {
+	public void setSelected(DbxWorldList.Entry entry) {
 		this.selected = entry == this.selected ? null : entry;
 		System.out.println("updated");
 		updateWorldInfo();

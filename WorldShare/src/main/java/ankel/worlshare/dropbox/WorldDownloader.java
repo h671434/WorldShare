@@ -23,7 +23,6 @@ public class WorldDownloader implements FileTransferer {
 	private final DbxClientV2 client;
 	private final String localpath;
 	private final List<String> files;
-	private final List<String> directories; 
 	private FileMetadata[] result;
 	
 	public WorldDownloader(DbxClientV2 client, String dbxfolder, String localpath) {
@@ -31,23 +30,23 @@ public class WorldDownloader implements FileTransferer {
 		this.client = client;
 		this.localpath = localpath;
 		this.files = new ArrayList<>();
-		this.directories = new ArrayList<>();
 		sortDirectory(dbxfolder);
 	}
 	
 	private void sortDirectory(String folder) {
 		try {
-			List<Metadata> content = client.files().listFolderBuilder(folder)
-				.withRecursive(true)
-				.start()
-				.getEntries();
+			List<Metadata> content = client.files().listFolderBuilder(folder.toLowerCase())
+					.withRecursive(false)
+					.start()
+					.getEntries();
+			LOGGER.debug(content);
 			content.forEach((metadata) -> {
 				if(metadata instanceof FileMetadata) {
 					this.files.add(metadata.getPathLower());
 					this.progress.sizeInBytes += ((FileMetadata) metadata).getSize();
 				}
 				if(metadata instanceof FolderMetadata) {
-					this.directories.add(metadata.getPathLower());
+					sortDirectory(metadata.getPathLower());
 				}
 			});
 		} catch (DbxException e) {
@@ -57,23 +56,20 @@ public class WorldDownloader implements FileTransferer {
 	
 	@Override
 	public void run() {
-		createFolders(directories);
 		downloadFileBatch(files);
 	}
 	
-	private void createFolders(List<String> directories) {
-		directories.forEach((dir) -> {
-			new File(getLocalPath(dir) + "/" + new File(dir).getName()).mkdirs();
-		});
-	}
-	
 	private void downloadFileBatch(List<String> files) {
+		LOGGER.debug("Downloading files...");
+		LOGGER.debug(files);
 		int amount = files.size();
 		this.result = new FileMetadata[amount];
 
 		for(int i = 0; i < amount; i++) {
 			String file = files.get(i);
 			String localdirectory = getLocalPath(file);
+			
+			new File(new File(localdirectory).getParent()).mkdirs();
 
 			try {
 				this.result[i] = downloadFile(file, localdirectory);

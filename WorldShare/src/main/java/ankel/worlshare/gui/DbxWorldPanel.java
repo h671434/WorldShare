@@ -23,7 +23,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.client.gui.ScrollPanel;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 
-public class WorldPanel extends ScrollPanel {	
+public class DbxWorldPanel extends ScrollPanel {	
 	private static IReorderingProcessor NO_WORLD_SELECTED =
 			new StringTextComponent("No world selected").getVisualOrderText();
 	private static IReorderingProcessor DROPBOX =
@@ -47,7 +47,7 @@ public class WorldPanel extends ScrollPanel {
 	private FontRenderer font;
 	private int contentHeight = 0;
 
-	public WorldPanel(DbxScreen screen, int width, int height, int top, int left) {
+	public DbxWorldPanel(DbxScreen screen, int width, int height, int top, int left) {
 		super(screen.getMinecraft(), width, height, top, left);
 		this.screen = screen;
 		this.font = screen.getFontRenderer();

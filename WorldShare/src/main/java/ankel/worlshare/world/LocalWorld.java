@@ -9,18 +9,25 @@ import net.minecraft.world.storage.WorldSummary;
 
 public class LocalWorld implements World {
 	private final WorldSummary summary;
+	
+	private String name;
 	private ResourceLocation icon;
+	private Date lastModified;
+	private String lastPerson;
 	private Status status;
 	
 	public LocalWorld(WorldSummary summary) {
 		this.summary = summary;
-		icon = null;
-		status = Status.UP_TO_DATE;
+		this.name = summary.getLevelName();
+		this.icon = null;
+		this.lastModified = new Date(summary.getLastPlayed());
+		this.lastPerson = "You";
+		this.status = Status.DISCONNECTED;
 	}
 
 	@Override
 	public String getWorldName() {
-		return this.summary.getLevelName();
+		return name;
 	}
 
 	@Override
@@ -33,18 +40,24 @@ public class LocalWorld implements World {
 
 	@Override
 	public Date getLastModified() {
-		return new Date(summary.getLastPlayed());
+		return lastModified;
 	}
 	
 	@Override
 	public String getLastPerson() {
-		return "";
+		return lastPerson;
 	}
 
+	@Override
 	public String getStatus() {
 		return status.getValue();
 	}
 
+	@Override
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+	
 	@Override
 	public int hashCode() {
 		return Objects.hash(summary.getLevelId());

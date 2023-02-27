@@ -39,14 +39,14 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class WorldList extends ExtendedList<WorldList.Entry> {
+public class DbxWorldList extends ExtendedList<DbxWorldList.Entry> {
 	private static final Logger LOGGER = LogManager.getLogger();
 	
 	public List<World> list;
 	private final DbxScreen screen;
 	
-	public WorldList(DbxScreen screen, Minecraft mc, int width, 
-			int top, int bottom,  @Nullable WorldList list) {
+	public DbxWorldList(DbxScreen screen, Minecraft mc, int width, 
+			int top, int bottom,  @Nullable DbxWorldList list) {
 		super(mc, width, screen.height, top, bottom, 36);
 		this.screen = screen;
 	    this.centerListVertically = false;
@@ -67,15 +67,15 @@ public class WorldList extends ExtendedList<WorldList.Entry> {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public static class Entry extends ExtendedList.AbstractListEntry<WorldList.Entry> {
+	public static class Entry extends ExtendedList.AbstractListEntry<DbxWorldList.Entry> {
 		protected final Minecraft minecraft;
 	    protected final DbxScreen screen;
-	    private final WorldList parent;
-	    private final World world;
+	    private final DbxWorldList parent;
+	    private final DbxWorld world;
 	    private final IReorderingProcessor nameDisplayCache;
 	    private final IBidiRenderer ownerDisplayCache;
 	    
-		public Entry(WorldList parent, World world) {
+		public Entry(DbxWorldList parent, DbxWorld world) {
 			this.minecraft = Minecraft.getInstance();
 			this.screen = parent.getScreen();
 			this.parent = parent;
@@ -83,7 +83,7 @@ public class WorldList extends ExtendedList<WorldList.Entry> {
 			this.nameDisplayCache = cacheName(minecraft, 
 					new StringTextComponent(world.getWorldName()));
 			this.ownerDisplayCache = cacheDescription(minecraft, 
-					new StringTextComponent(world.getStatus()));
+					new StringTextComponent(""));
 		}
 		
 		private static IReorderingProcessor cacheName(Minecraft minecraft, 
@@ -127,7 +127,7 @@ public class WorldList extends ExtendedList<WorldList.Entry> {
 			return false;
 		}
 		
-		public World getWorld() {
+		public DbxWorld getWorld() {
 			return world;
 		}
 	}

@@ -9,6 +9,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
@@ -18,40 +21,47 @@ import ankel.worlshare.world.World.Status;
 import net.minecraft.util.ResourceLocation;
 
 public class DbxWorld implements World {
+	private static final Logger LOGGER = LogManager.getLogger();
+	
 	private static final String ROOT_FOLDER = "/WorldShare/";
 	private static final String ICON_FILE = "/icon.png";
-	private static final String LEVEL_FILE = "/level.dat";
+	
 	private final DbxClientV2 client;
-	private final String worldname;
+	
+	private String name;
 	private ResourceLocation icon;
+	private Date lastModified;
+	private String lastPerson;
+	private LocalWorld localWorld;
+	private List<String> members;
+	
 	private Status status;
 	
-	public DbxWorld(DbxClientV2 client, String worldname) {
+	public DbxWorld(DbxClientV2 client, String name, Date lastModified,
+			String lastPerson, LocalWorld localWorld, List<String> members,
+			Status status) {
 		this.client = client;
-		this.worldname = worldname;
-		icon = null;
-		status = Status.UP_TO_DATE;
+		this.name = name;
+		this.icon = null;
+		this.lastModified = lastModified;
+		this.lastPerson = lastPerson;
+		this.localWorld = localWorld;
+		this.members = members;
+		this.status = status;
 	}	
 
-
-	public LocalWorld getLocalWorld() {
-		return null;
-	}
-	
-	public List<String> getMembers() {
-		return Collections.emptyList();
-	}
 	
 	@Override
 	public ResourceLocation getServerIcon() {
 		if(icon == null) {
-			File localPath = new File("/saves/" + worldname + ICON_FILE).getAbsoluteFile();
-			new File(localPath.getParent()).mkdir();
+			File localPath = new File("/saves/" + ROOT_FOLDER + name).getAbsoluteFile();
+			new File(localPath.getParent()).mkdirs();
 			try(OutputStream out = new FileOutputStream(localPath)) {
-				client.files().getThumbnail(ROOT_FOLDER + worldname + ICON_FILE).download(out);
+				client.files().getThumbnail(ROOT_FOLDER + name + ICON_FILE).download(out);
 			} catch (DbxException | IOException e) {
+				LOGGER.error(e.getMessage());
 			}
-			icon = loadServerIcon(localPath);
+			icon = loadServerIcon(new File(localPath + ICON_FILE));
 		}
 		
 		return icon;	
@@ -59,25 +69,25 @@ public class DbxWorld implements World {
 	
 	@Override
 	public String getWorldName() {
-		return worldname;
-	}
-
-	@Override
-	public String getLastPerson() {
-		return "";
+		return name;
 	}
 	
 	@Override
 	public Date getLastModified() {
-		try {
-			Metadata data = client.files().getMetadata(ROOT_FOLDER + worldname + LEVEL_FILE);
-			if (data instanceof FileMetadata) {
-				return ((FileMetadata) data).getClientModified();
-			}
-		} catch (DbxException e) {
-			System.out.println(e);
-		}
-		return new Date(0);
+		return lastModified;
+	}
+
+	@Override
+	public String getLastPerson() {
+		return lastPerson;
+	}
+	
+	public LocalWorld getLocalWorld() {
+		return localWorld;
+	}
+	
+	public List<String> getMembers() {
+		return members;
 	}
 	
 	@Override
@@ -86,8 +96,13 @@ public class DbxWorld implements World {
 	}
 	
 	@Override
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+	
+	@Override
 	public int hashCode() {
-		return Objects.hash(worldname);
+		return Objects.hash(name);
 	}
 
 	@Override

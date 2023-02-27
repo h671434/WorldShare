@@ -27,70 +27,28 @@ public class WorldController {
 	private final static String DBX_FOLDER = "/WorldShare";
 	private final Minecraft minecraft;
 	private final DbxClientV2 client;
-	private final List<World> localworlds;
-	private final List<World> dbxworlds;
+	private final List<DbxWorld> dbxworlds;
 	private final Runnable onListChange;
 	
 	public WorldController(Minecraft minecraft, DbxClientV2 client, Runnable onListChange) {
 		this.minecraft = minecraft;
 		this.client = client;
 		this.dbxworlds = new ArrayList<>();
-		this.localworlds = new ArrayList<>();
 		this.onListChange = onListChange;
+		createDbxFolderIfAbsent();
 	}
 	
-	public List<World> getLocalWorlds() {
-		try {
-			List<WorldSummary> worldsummaries = minecraft.getLevelSource().getLevelList();
-			this.localworlds.clear();
-			worldsummaries.forEach((summary) -> {
-				this.localworlds.add(new LocalWorld(summary));
-			});
-			Collections.sort(this.localworlds);
-		} catch (AnvilConverterException e) {
-		}
-		return this.localworlds;
-	}
-	
-	public List<World> getDbxWorlds() {
+	private void createDbxFolderIfAbsent() {
 		try {
 			if(client.files().searchV2("WorldShare").getMatches().size() < 1)
 				client.files().createFolderV2(DBX_FOLDER);
-			
-			updateShared();
-			
-			List<Metadata> dbxentries = client.files().listFolder(DBX_FOLDER).getEntries();
-			this.dbxworlds.clear();
-			dbxentries.forEach((metadata) -> {
-				this.dbxworlds.add(new DbxWorld(client, metadata.getName()));
-			});
-			Collections.sort(this.dbxworlds);
 		} catch (DbxException e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		}
-		return this.dbxworlds;
-	}
-	
-	private void updateShared() throws DbxException {
-		List<SharedFolderMetadata> mountable = client.sharing().listMountableFolders().getEntries();
-		mountable.forEach((metadata) -> {
-			if(metadata.getPathLower() == null) {
-				try {
-					LOGGER.info("Mounting folder " + metadata.getName());
-					SharedFolderMetadata newdata = client.sharing().mountFolder(metadata.getSharedFolderId());
-					LOGGER.info("Noving folder " + newdata.getName() + " to " +  DBX_FOLDER + "/" + newdata.getName());
-					client.files().moveV2Builder("/" + newdata.getName(), DBX_FOLDER + "/" + newdata.getName())
-						.withAllowSharedFolder(true)
-						.start();
-				} catch (DbxException e) {
-					LOGGER.error(e.getMessage());
-				}
-			}
-
-		});
 	}
 	
 	public void uploadWorld(LocalWorld world) {
+		LOGGER.info("Uploading...");
 		File file = new File(minecraft.getLevelSource().getBaseDir().toString(), world.getWorldName());
 		WorldUploader uploader = new WorldUploader(client, file);
 		new Thread(uploader).start();
@@ -104,6 +62,7 @@ public class WorldController {
 	}
 	
 	public void downloadWorld(DbxWorld world) {
+		LOGGER.info("Downloading...");
 		String localdir = minecraft.getLevelSource().getBaseDir().toString();
 		WorldDownloader downloader = new WorldDownloader(client, DBX_FOLDER + "/" + world.getWorldName(), localdir);
 		new Thread(downloader).start();
@@ -123,5 +82,43 @@ public class WorldController {
 		WorldSharing sharer = new WorldSharing(client, DBX_FOLDER + "/" + world.getWorldName(), emails);
 		new Thread(sharer).start();
 	}
+	
+	public List<DbxWorld> getDbxWorlds() {
+		try {
+			updateShared();
+
+			List<Metadata> dbxEntries = client.files().listFolder(DBX_FOLDER).getEntries();
+			List<WorldSummary> worldSummaries = minecraft.getLevelSource().getLevelList();
+			
+			this.dbxworlds.clear();
+			dbxEntries.forEach((metadata) -> {
+				this.dbxworlds.add(new DbxWorldAutoBuilder(client, metadata, worldSummaries).autoBuild());
+			});
+			
+			Collections.sort(this.dbxworlds);
+		} catch (DbxException | AnvilConverterException e) {
+			LOGGER.error(e.getMessage());
+		}
+		return this.dbxworlds;
+	}
+	
+	private void updateShared() throws DbxException {
+		List<SharedFolderMetadata> mountable = client.sharing().listMountableFolders().getEntries();
+		mountable.forEach((metadata) -> {
+			if(metadata.getPathLower() == null) {
+				try {
+					LOGGER.debug("Mounting folder " + metadata.getName());
+					SharedFolderMetadata newdata = client.sharing().mountFolder(metadata.getSharedFolderId());
+					LOGGER.debug("Noving folder " + newdata.getName() + " to " +  DBX_FOLDER + "/" + newdata.getName());
+					client.files().moveV2Builder("/" + newdata.getName(), DBX_FOLDER + "/" + newdata.getName())
+						.withAllowSharedFolder(true)
+						.start();
+				} catch (DbxException e) {
+					LOGGER.error(e.getMessage());
+				}
+			}
+		});
+	}
+	
 
 }
