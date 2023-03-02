@@ -58,7 +58,7 @@ public class DbxWorldAutoBuilder {
 	}
 	
 	private Date getLastModified(String name) {
-		Date date = new Date(0);
+		Date date = new Date();
 		
 		try {
 			Metadata data = client.files().getMetadata(ROOT_FOLDER + name + LEVEL_FILE);

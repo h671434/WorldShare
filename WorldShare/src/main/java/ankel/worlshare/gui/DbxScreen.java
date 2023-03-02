@@ -59,7 +59,7 @@ public class DbxScreen extends Screen {
 		y -= PADDING + 20;
 		this.addButton(new Button(PADDING, y, LIST_WIDTH, 20,
 				new StringTextComponent("Add world"),
-				b -> System.out.println("TODO"))); 
+				b -> minecraft.setScreen(new AddWorldScreen(this, controller)))); 
 		
 		y -= PADDING;
 	    this.worldList = new DbxWorldList(this, minecraft, LIST_WIDTH, 

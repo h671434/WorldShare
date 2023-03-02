@@ -8,10 +8,13 @@ import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class AddMemberScreen extends Screen {
+	private static final ITextComponent ENTER_EMAIL =
+			new StringTextComponent("Enter new members email");
 	private Screen lastScreen;
 	private WorldController controller;
 	private DbxWorld world;
@@ -45,6 +48,8 @@ public class AddMemberScreen extends Screen {
 	@Override
 	public void render(MatrixStack mStack, int mouseX, int mouseY, float partialTicks) {
 		this.renderDirtBackground(0);
+		drawCenteredString(mStack, this.font, this.title, this.width / 2, 15, 16777215);
+	    drawCenteredString(mStack, this.font, ENTER_EMAIL, this.width / 2, 30, 10526880);
 		this.memberInput.render(mStack, mouseX, mouseY, partialTicks);
 		super.render(mStack, mouseX, mouseY, partialTicks);
 	}

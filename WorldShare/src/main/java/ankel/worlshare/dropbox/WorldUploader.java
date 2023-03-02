@@ -28,8 +28,9 @@ public class WorldUploader implements FileTransferer {
 	private final List<File> files;
 	private final List<File> directories;
 	private FileMetadata[] result;
+	private Date lastModified;
 	
-	public WorldUploader(DbxClientV2 client, File folder) throws IllegalArgumentException {
+	public WorldUploader(DbxClientV2 client, File folder, Date lastModified) throws IllegalArgumentException {
 		if(!folder.isDirectory()) {
 			throw new IllegalArgumentException();
 		}
@@ -38,6 +39,7 @@ public class WorldUploader implements FileTransferer {
 		this.localfolder = folder;
 		this.files = new ArrayList<>();
 		this.directories = new ArrayList<>();
+		this.lastModified = lastModified;
 		sortDirectory(localfolder);
 	}
 	
@@ -105,8 +107,9 @@ public class WorldUploader implements FileTransferer {
 	private FileMetadata uploadFile(File file, String dbxPath) throws UploadErrorException, DbxException, IOException {
 		try (InputStream in = new FileInputStream(file)) {
 			return client.files().uploadBuilder(dbxPath)
+//					.withPropertyGroups(null)
 	        		.withMode(WriteMode.OVERWRITE)
-	                .withClientModified(new Date(file.lastModified()))
+	                .withClientModified(lastModified)
 	                .uploadAndFinish(in);
 		}
 	}

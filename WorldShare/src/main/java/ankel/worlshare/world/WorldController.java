@@ -40,8 +40,9 @@ public class WorldController {
 	
 	private void createDbxFolderIfAbsent() {
 		try {
-			if(client.files().searchV2("WorldShare").getMatches().size() < 1)
+			if(client.files().searchV2("WorldShare").getMatches().size() < 1) {
 				client.files().createFolderV2(DBX_FOLDER);
+			}
 		} catch (DbxException e) {
 			LOGGER.error(e.getMessage());
 		}
@@ -50,7 +51,7 @@ public class WorldController {
 	public void uploadWorld(LocalWorld world) {
 		LOGGER.info("Uploading...");
 		File file = new File(minecraft.getLevelSource().getBaseDir().toString(), world.getWorldName());
-		WorldUploader uploader = new WorldUploader(client, file);
+		WorldUploader uploader = new WorldUploader(client, file, world.getLastModified());
 		new Thread(uploader).start();
 		
 		IAsyncReloader reloader = uploader.progress;
