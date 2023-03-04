@@ -54,8 +54,8 @@ public class DbxScreen extends Screen {
 				new TranslationTextComponent("gui.done"), 
 				b -> onClose()));
 		this.addButton(new Button(PADDING, y, LIST_WIDTH, 20,
-				new StringTextComponent("Refresh"),
-				b -> reload())); 
+				new StringTextComponent("Config"),
+				b -> minecraft.setScreen(new ConfigScreen(this)))); 
 		y -= PADDING + 20;
 		this.addButton(new Button(PADDING, y, LIST_WIDTH, 20,
 				new StringTextComponent("Add world"),
