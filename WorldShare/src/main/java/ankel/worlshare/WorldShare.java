@@ -27,36 +27,16 @@ public class WorldShare {
 	public WorldShare() {
 		
 		IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();	
-		
-		// Register setup methods for modloading
-        eventBus.addListener(this::setup);
-        eventBus.addListener(this::clientSetup);
-        eventBus.addListener(this::enqueueIMC);
-        eventBus.addListener(this::processIMC);
         
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, 
         		WorldShareConfigs.SPEC, "worldshare.toml");
+        
         ModLoadingContext.get().registerExtensionPoint(
         		ExtensionPoint.CONFIGGUIFACTORY,
         		() -> (mc, screen) -> new ConfigScreen(screen));
         
         // Register ourselves for other server and game events
         MinecraftForge.EVENT_BUS.register(this);  
-	}
-	
-	private void setup(final FMLCommonSetupEvent event) {
-	}
-	
-	private void clientSetup(final FMLClientSetupEvent event) {
-	}
-	
-	private void enqueueIMC(final InterModEnqueueEvent event) {
-        InterModComms.sendTo("worldshare", "helloworld", 
-        		() -> { LOGGER.info("Hello world from the WorldShare"); 
-        		return "Hello world";});
-	}
-	
-	private void processIMC(final InterModProcessEvent event) {
 	}
 	
 }

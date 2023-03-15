@@ -93,7 +93,7 @@ public class WorldController {
 			
 			this.dbxworlds.clear();
 			dbxEntries.forEach((metadata) -> {
-				this.dbxworlds.add(new DbxWorldAutoBuilder(client, metadata, worldSummaries).autoBuild());
+				this.dbxworlds.add(new DbxWorldBuilder(client, metadata, worldSummaries).build());
 			});
 			
 			Collections.sort(this.dbxworlds);
